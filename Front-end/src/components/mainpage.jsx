@@ -4,18 +4,6 @@ import { saveTask, getTasks, deleteTask } from "../services/taskService";
 const Main = () => {
   const [title, setTitle] = useState("");
   const [tasks, setTasks] = useState();
-  /*   constructor(props) {
-        super(props);
-    
-        this.state = {
-            title:"",
-            tasks:[]
-        };
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleDelete = this.handleDelete.bind(this);
-    }
-    */
 
   useEffect(() => {
     async function fetchData() {
@@ -91,7 +79,7 @@ const Main = () => {
               <div style={{ textAlign: "right" }}>
                 <button
                   type="text"
-                  onClick={()=>handleDelete(task)}
+                  onClick={() => handleDelete(task)}
                   className="btn btn-danger"
                 >
                   Delete
