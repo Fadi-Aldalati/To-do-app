@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { BsCheck2All } from "react-icons/bs";
 import {
   saveTask,
   getTasks,
@@ -7,16 +8,19 @@ import {
 } from "../services/taskService";
 
 const Main = () => {
-  const [title, setTitle] = useState("");
+  const [currentTask, setCurrentTask] = useState({
+    title: "",
+    _id: "",
+  });
   const [tasks, setTasks] = useState();
-  const [edit, setEdit] = useState();
 
-  useEffect(() => {
+  useEffect((currentTask) => {
     async function fetchData() {
       const data = await (await getTasks()).data;
       const tasks = [...data];
       setTasks(tasks);
     }
+    console.log(currentTask);
     fetchData();
   }, []);
 
@@ -29,28 +33,33 @@ const Main = () => {
       console.log("deleting task error", err);
     }
   }
-  async function handleEdit(task) {
+  async function handleEdit(event) {
+    event.preventDefault();
     try {
-      task.title = title;
-      console.log(await editTask(task));
-      const data = await (await getTasks()).data;
-      const tasks = [...data];
-      setTasks(tasks);
+      if (currentTask.title !== "") {
+        console.log(await editTask(currentTask));
+        const data = await (await getTasks()).data;
+        const tasks = [...data];
+        setTasks(tasks);
+      } else {
+        console.log("Task has to be an string");
+      }
     } catch (err) {
       console.log("deleting task error", err);
     }
+    setCurrentTask({ title: currentTask.title, _id: "" });
   }
 
   function handleChange(e) {
-    setTitle(e.target.value);
+    setCurrentTask({ title: e.target.value, _id: currentTask._id });
   }
   async function handleSubmit(event) {
     event.preventDefault();
 
     try {
-      if (title !== "") {
+      if (currentTask.title !== "") {
         const demo = {
-          title: title,
+          title: currentTask.title,
         };
 
         const task = await (await saveTask(demo)).data;
@@ -62,13 +71,13 @@ const Main = () => {
       console.log("submiting task error", err);
     }
     event.target.reset();
-    setTitle("");
+    setCurrentTask({ title: "", _id: currentTask._id });
   }
 
   return (
     <React.Fragment>
       <div className="container" style={{ marginTop: "20px" }}>
-        <h2>Add Item</h2>
+        <h2>Add Task</h2>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <div className="form-outline">
@@ -79,7 +88,7 @@ const Main = () => {
                 className="form-control"
               />
             </div>
-            <button className="btn btn-primary">Submit</button>
+            <button className="btn btn-primary rounded">Submit</button>
           </div>
         </form>
         <br />
@@ -89,20 +98,23 @@ const Main = () => {
               key={task._id}
               className="list-group-item d-flex justify-content-between align-items-center"
             >
-              {edit !== task._id && task.title}
-              {edit === task._id && (
+              {currentTask._id !== task._id && task.title}
+              {currentTask._id === task._id && (
                 <>
-                  <form onSubmit={() => handleEdit(task)}>
+                  <form onSubmit={handleEdit}>
                     <div className="input-group">
                       <div className="form-outline">
                         <input
+                          style={{ width: "auto" }}
                           type="text"
                           onChange={handleChange}
-                          placeholder="Type here..."
+                          defaultValue={task.title}
                           className="form-control"
                         />
                       </div>
-                      <button className="btn btn-primary">Submit</button>
+                      <button className="btn btn-success rounded">
+                        <BsCheck2All size={22} />
+                      </button>
                     </div>
                   </form>
                 </>
@@ -110,7 +122,9 @@ const Main = () => {
               <div style={{ textAlign: "right" }}>
                 <button
                   type="text"
-                  onClick={() => setEdit(task._id)}
+                  onClick={() =>
+                    setCurrentTask({ title: currentTask.title, _id: task._id })
+                  }
                   className="btn btn-primary"
                 >
                   Edit
