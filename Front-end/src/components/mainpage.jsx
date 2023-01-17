@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { saveTask, getTasks, deleteTask } from "../services/taskService";
+import {
+  saveTask,
+  getTasks,
+  deleteTask,
+  editTask,
+} from "../services/taskService";
 
 const Main = () => {
   const [title, setTitle] = useState("");
   const [tasks, setTasks] = useState();
+  const [edit, setEdit] = useState();
 
   useEffect(() => {
     async function fetchData() {
       const data = await (await getTasks()).data;
-      console.log(data);
       const tasks = [...data];
       setTasks(tasks);
     }
@@ -24,6 +29,17 @@ const Main = () => {
       console.log("deleting task error", err);
     }
   }
+  async function handleEdit(task) {
+    try {
+      task.title = title;
+      console.log(await editTask(task));
+      const data = await (await getTasks()).data;
+      const tasks = [...data];
+      setTasks(tasks);
+    } catch (err) {
+      console.log("deleting task error", err);
+    }
+  }
 
   function handleChange(e) {
     setTitle(e.target.value);
@@ -33,7 +49,6 @@ const Main = () => {
 
     try {
       if (title !== "") {
-        console.log(title);
         const demo = {
           title: title,
         };
@@ -41,7 +56,6 @@ const Main = () => {
         const task = await (await saveTask(demo)).data;
 
         const newTasks = [...tasks, task];
-        console.log(newTasks);
         setTasks(newTasks);
       }
     } catch (err) {
@@ -75,8 +89,32 @@ const Main = () => {
               key={task._id}
               className="list-group-item d-flex justify-content-between align-items-center"
             >
-              {task.title}
+              {edit !== task._id && task.title}
+              {edit === task._id && (
+                <>
+                  <form onSubmit={() => handleEdit(task)}>
+                    <div className="input-group">
+                      <div className="form-outline">
+                        <input
+                          type="text"
+                          onChange={handleChange}
+                          placeholder="Type here..."
+                          className="form-control"
+                        />
+                      </div>
+                      <button className="btn btn-primary">Submit</button>
+                    </div>
+                  </form>
+                </>
+              )}
               <div style={{ textAlign: "right" }}>
+                <button
+                  type="text"
+                  onClick={() => setEdit(task._id)}
+                  className="btn btn-primary"
+                >
+                  Edit
+                </button>
                 <button
                   type="text"
                   onClick={() => handleDelete(task)}
